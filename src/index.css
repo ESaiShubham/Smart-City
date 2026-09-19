@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  
+  body {
+    @apply bg-[#0b0f17] text-slate-100 font-sans antialiased selection:bg-blue-500/20 selection:text-blue-300;
+  }
+}
+
+/* Clean minimal scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f17;
+}
+::-webkit-scrollbar-thumb {
+  background: #20293a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Clean subtle borders and panels */
+.clean-panel {
+  background: #131926;
+  border: 1px solid #20293a;
+  border-radius: 1rem;
+}
