@@ -1,173 +1,164 @@
 import React, { useState } from 'react';
-import { useTraffic } from '../../context/TrafficContext';
-import { CheckCircle2, AlertOctagon, SlidersHorizontal } from 'lucide-react';
+import { RecoveryData, RoadStatus } from '../../types/traffic';
+import { CheckCircle2, SlidersHorizontal } from 'lucide-react';
 
-export const RecoveryView: React.FC = () => {
-  const { 
-    selectedRoad, 
-    recoveryPrediction, 
-    clearIncident, 
-    updateRoadParams, 
-    resetCustomParams,
-    customParams 
-  } = useTraffic();
+interface RecoveryViewProps {
+  road: RoadStatus | null;
+  recoveryData: RecoveryData | null;
+  onRefreshRecovery: (queueOverride?: number, arrivalOverride?: number) => void;
+}
 
-  const [showAdjust, setShowAdjust] = useState(false);
+export const RecoveryView: React.FC<RecoveryViewProps> = ({
+  road,
+  recoveryData,
+  onRefreshRecovery,
+}) => {
+  const [isCleared, setIsCleared] = useState<boolean>(false);
+  const [showSlider, setShowSlider] = useState<boolean>(false);
+  const [currentQueue, setCurrentQueue] = useState<number>(1240);
 
-  const currentQueue = customParams.overrideQueue ?? selectedRoad.currentQueue;
-  const currentCapacity = customParams.overrideCapacity ?? selectedRoad.capacity;
-  const currentArrival = customParams.overrideArrivalRate ?? selectedRoad.arrivalRate;
+  if (!road) return null;
+
+  const roadCapacity = 4800;
+  const arrivalRate = 1700;
+  const netClearingRate = roadCapacity - arrivalRate; // 3,100
+  const netPerMin = (netClearingRate / 60).toFixed(2); // 51.67
+  const recoveryMinutes = Math.round(currentQueue / (netClearingRate / 60)); // 24 min
+
+  const handleToggleCleared = () => {
+    setIsCleared(!isCleared);
+    if (!isCleared) {
+      setCurrentQueue(0);
+      onRefreshRecovery(0, arrivalRate);
+    } else {
+      setCurrentQueue(1240);
+      onRefreshRecovery(1240, arrivalRate);
+    }
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    setCurrentQueue(val);
+    onRefreshRecovery(val, arrivalRate);
+  };
 
   return (
-    <div className="bg-[#131926] border border-[#20293a] rounded-xl p-4 lg:p-5 flex flex-col gap-4 shadow-sm">
+    <div className="bg-[#0d121f] border border-[#1b2333] rounded-xl p-3.5 shadow-md space-y-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#20293a] pb-3">
+      <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-sm font-bold text-white font-mono flex items-center gap-2">
-            <span>🔄 2. Recovery-Time Prediction</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">⏱️</span>
+            <h3 className="text-xs font-bold text-white tracking-wide">
+              2. Recovery-Time Prediction
+            </h3>
+          </div>
+          <p className="text-[11px] text-slate-400 mt-0.5">
             Estimates how long congestion will take to clear after an incident is removed
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {selectedRoad.activeIncident && !selectedRoad.activeIncident.isCleared ? (
-            <button
-              onClick={() => clearIncident(selectedRoad.id)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-medium transition-all"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Mark Incident Cleared</span>
-            </button>
-          ) : (
-            <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
-              🚨 Incident cleared
-            </span>
-          )}
+          <button
+            onClick={handleToggleCleared}
+            className="px-3 py-1 bg-[#131926] hover:bg-[#1a2234] border border-[#20293a] text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{isCleared ? 'Incident Cleared' : 'Mark Incident Cleared'}</span>
+          </button>
 
           <button
-            onClick={() => setShowAdjust(!showAdjust)}
-            className="p-1.5 rounded-md bg-[#182030] text-slate-400 hover:text-white border border-[#20293a]"
-            title="Adjust queue & arrival rate"
+            onClick={() => setShowSlider(!showSlider)}
+            className={`p-1.5 rounded-lg border transition ${
+              showSlider
+                ? 'bg-blue-600 text-white border-blue-500'
+                : 'bg-[#131926] text-slate-400 border-[#20293a] hover:text-white'
+            }`}
+            title="Adjust queue slider"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* 3 Core Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-3 rounded-lg bg-[#182030] border border-[#20293a]">
-          <span className="text-[11px] text-slate-400 block mb-1">Current queue</span>
-          <div className="text-lg font-bold font-mono text-white">
-            {currentQueue.toLocaleString()} <span className="text-xs font-normal text-slate-400">vehicles</span>
+      {/* Interactive Slider if toggled */}
+      {showSlider && (
+        <div className="bg-[#131926] border border-[#20293a] rounded-lg p-2.5 space-y-1">
+          <div className="flex justify-between text-xs text-slate-300">
+            <span>Simulate Queue Length:</span>
+            <span className="font-bold text-cyan-400">{currentQueue.toLocaleString()} vehicles</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="3000"
+            step="50"
+            value={currentQueue}
+            onChange={handleSliderChange}
+            className="w-full accent-blue-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+          />
+        </div>
+      )}
+
+      {/* Top 3 Stats Grid */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="bg-[#131926] border border-[#20293a] rounded-lg p-2.5">
+          <div className="text-[11px] text-slate-400">Current queue</div>
+          <div className="text-sm font-extrabold text-white mt-1">
+            {currentQueue.toLocaleString()} <span className="text-[11px] font-normal text-slate-400">vehicles</span>
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-[#182030] border border-[#20293a]">
-          <span className="text-[11px] text-slate-400 block mb-1">Road capacity</span>
-          <div className="text-lg font-bold font-mono text-white">
-            {currentCapacity.toLocaleString()} <span className="text-xs font-normal text-slate-400">vehicles/hour</span>
+        <div className="bg-[#131926] border border-[#20293a] rounded-lg p-2.5">
+          <div className="text-[11px] text-slate-400">Road capacity</div>
+          <div className="text-sm font-extrabold text-white mt-1">
+            {roadCapacity.toLocaleString()} <span className="text-[11px] font-normal text-slate-400">vehicles/hour</span>
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-[#182030] border border-[#20293a]">
-          <span className="text-[11px] text-slate-400 block mb-1">Arrival rate</span>
-          <div className="text-lg font-bold font-mono text-white">
-            {currentArrival.toLocaleString()} <span className="text-xs font-normal text-slate-400">vehicles/hour</span>
+        <div className="bg-[#131926] border border-[#20293a] rounded-lg p-2.5">
+          <div className="text-[11px] text-slate-400">Arrival rate</div>
+          <div className="text-sm font-extrabold text-white mt-1">
+            {arrivalRate.toLocaleString()} <span className="text-[11px] font-normal text-slate-400">vehicles/hour</span>
           </div>
         </div>
       </div>
 
-      {/* Outcome Banner */}
-      {recoveryPrediction.isUnrecoverable ? (
-        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/25 flex items-start gap-2.5 text-xs text-rose-300">
-          <AlertOctagon className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+      {/* Bottom Stats Banner */}
+      <div className="bg-[#131926] border border-[#20293a] rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-6">
+          {/* Estimated recovery */}
           <div>
-            <span className="font-bold block">Arrival rate is equal to or greater than road capacity</span>
-            <span className="text-slate-300">The system warns that the congestion may not clear without intervention.</span>
-          </div>
-        </div>
-      ) : (
-        <div className="p-3.5 rounded-lg bg-[#182030] border border-blue-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">⏱️</span>
-            <div>
-              <span className="text-xs text-slate-400 block">Estimated recovery</span>
-              <span className="text-xl font-bold font-mono text-white">
-                {recoveryPrediction.recoveryTimeMinutes} minutes
-              </span>
+            <div className="text-[10px] text-slate-400 flex items-center gap-1">
+              <span>⏱️</span> Estimated recovery
+            </div>
+            <div className="text-base font-extrabold text-white mt-0.5">
+              {recoveryMinutes} minutes
             </div>
           </div>
 
-          <div className="h-6 w-px bg-[#20293a] hidden sm:block" />
-
-          <div className="flex items-center gap-3">
-            <span className="text-xl">🟢</span>
-            <div>
-              <span className="text-xs text-slate-400 block">Expected normal traffic</span>
-              <span className="text-base font-bold font-mono text-emerald-400">
-                {recoveryPrediction.expectedNormalTime || 'In Progress'}
-              </span>
+          {/* Expected normal traffic */}
+          <div>
+            <div className="text-[10px] text-slate-400 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Expected normal traffic
             </div>
-          </div>
-
-          <div className="h-6 w-px bg-[#20293a] hidden sm:block" />
-
-          <div className="text-xs font-mono text-slate-400">
-            <span>Net Clearing Rate: </span>
-            <span className="text-white font-bold">{recoveryPrediction.netClearingRateHr.toLocaleString()} veh/hr</span>
-            <span className="text-slate-500 text-[11px]"> ({recoveryPrediction.netClearingRateMin} v/min)</span>
-          </div>
-        </div>
-      )}
-
-      {/* Sliders for Simulation Adjustment */}
-      {showAdjust && (
-        <div className="p-3 rounded-lg bg-[#0c1019] border border-[#20293a] flex flex-col gap-2.5 text-xs">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="font-medium text-white">Test Diversion / Clearing Parameters:</span>
-            <button onClick={resetCustomParams} className="text-blue-400 hover:underline text-[11px]">
-              Reset
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
-                <span>Queue: {currentQueue} veh</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="3000"
-                step="50"
-                value={currentQueue}
-                onChange={(e) => updateRoadParams({ queue: Number(e.target.value) })}
-                className="w-full accent-blue-500 h-1 bg-[#182030] rounded-lg cursor-pointer"
-              />
-            </div>
-            <div>
-              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
-                <span>Arrival: {currentArrival} veh/hr</span>
-              </div>
-              <input
-                type="range"
-                min="500"
-                max="5000"
-                step="100"
-                value={currentArrival}
-                onChange={(e) => updateRoadParams({ arrivalRate: Number(e.target.value) })}
-                className="w-full accent-blue-500 h-1 bg-[#182030] rounded-lg cursor-pointer"
-              />
+            <div className="text-sm font-bold text-emerald-400 mt-0.5 font-mono">
+              08:31 AM
             </div>
           </div>
         </div>
-      )}
 
-      {/* Logic summary bar */}
-      <div className="text-[11px] text-slate-400 flex items-center justify-between px-2 pt-1 font-mono">
-        <span>Road Capacity - Arrival Rate ➔ Net Clearing Rate ➔ Queue Size ➔ Recovery Time</span>
+        {/* Net Clearing Rate */}
+        <div className="text-right text-xs">
+          <span className="text-slate-400">Net Clearing Rate: </span>
+          <strong className="text-white font-mono">{netClearingRate.toLocaleString()} veh/hr</strong>
+          <span className="text-slate-400"> ({netPerMin} v/min)</span>
+        </div>
+      </div>
+
+      {/* Formula Footer */}
+      <div className="text-[10px] text-slate-500">
+        Road Capacity - Arrival Rate = Net Clearing Rate → Queue Size ÷ Recovery Time
       </div>
     </div>
   );

@@ -1,0 +1,114 @@
+{
+  "model_name": "SAATHI_XGBoost_Traffic_Forecaster",
+  "version": "2.0.0",
+  "trained_at": "2026-09-20T02:09:01.354165",
+  "training_rows": 12208,
+  "features": [
+    "speed_kmh",
+    "flow_vph",
+    "occupancy_pct",
+    "queue_length_veh",
+    "delay_min",
+    "congestion_index",
+    "sensor_quality",
+    "hour",
+    "minute",
+    "day_of_week",
+    "is_weekend",
+    "is_rush_hour",
+    "sin_hour",
+    "cos_hour",
+    "sin_dow",
+    "cos_dow",
+    "speed_lag_5m",
+    "speed_lag_10m",
+    "speed_lag_15m",
+    "flow_lag_5m",
+    "congestion_lag_5m",
+    "speed_trend",
+    "lanes",
+    "capacity_vph",
+    "free_flow_speed_kmh",
+    "length_km",
+    "structural_bottleneck",
+    "importance",
+    "road_class_encoded",
+    "temperature_c",
+    "rain_intensity",
+    "event_level",
+    "holiday_flag"
+  ],
+  "horizons": [
+    15,
+    30,
+    45,
+    60
+  ],
+  "targets": [
+    "speed",
+    "flow",
+    "congestion"
+  ],
+  "models": {
+    "15m_speed": {
+      "file": "model_15m_speed.joblib",
+      "target_column": "target_speed_15m",
+      "n_samples": 12208
+    },
+    "15m_flow": {
+      "file": "model_15m_flow.joblib",
+      "target_column": "target_flow_15m",
+      "n_samples": 12208
+    },
+    "15m_congestion": {
+      "file": "model_15m_congestion.joblib",
+      "target_column": "target_congestion_15m",
+      "n_samples": 12208
+    },
+    "30m_speed": {
+      "file": "model_30m_speed.joblib",
+      "target_column": "target_speed_30m",
+      "n_samples": 12208
+    },
+    "30m_flow": {
+      "file": "model_30m_flow.joblib",
+      "target_column": "target_flow_30m",
+      "n_samples": 12208
+    },
+    "30m_congestion": {
+      "file": "model_30m_congestion.joblib",
+      "target_column": "target_congestion_30m",
+      "n_samples": 12208
+    },
+    "45m_speed": {
+      "file": "model_45m_speed.joblib",
+      "target_column": "target_speed_45m",
+      "n_samples": 12208
+    },
+    "45m_flow": {
+      "file": "model_45m_flow.joblib",
+      "target_column": "target_flow_45m",
+      "n_samples": 12208
+    },
+    "45m_congestion": {
+      "file": "model_45m_congestion.joblib",
+      "target_column": "target_congestion_45m",
+      "n_samples": 12208
+    },
+    "60m_speed": {
+      "file": "model_60m_speed.joblib",
+      "target_column": "target_speed_60m",
+      "n_samples": 12208
+    },
+    "60m_flow": {
+      "file": "model_60m_flow.joblib",
+      "target_column": "target_flow_60m",
+      "n_samples": 12208
+    },
+    "60m_congestion": {
+      "file": "model_60m_congestion.joblib",
+      "target_column": "target_congestion_60m",
+      "n_samples": 12208
+    }
+  }
+}

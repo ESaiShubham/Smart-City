@@ -1,0 +1,97 @@
+{
+  "evaluation_samples": 30000,
+  "horizons": {
+    "15m": {
+      "speed": {
+        "MAE": 0.1981,
+        "RMSE": 0.3119,
+        "R2": 0.9992
+      },
+      "flow": {
+        "MAE": 149.5713,
+        "RMSE": 207.3674,
+        "R2": 0.499
+      },
+      "congestion": {
+        "MAE": 0.0038,
+        "RMSE": 0.0062,
+        "R2": -0.096
+      },
+      "congestion_classification": {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0
+      }
+    },
+    "30m": {
+      "speed": {
+        "MAE": 0.2264,
+        "RMSE": 0.3739,
+        "R2": 0.9989
+      },
+      "flow": {
+        "MAE": 150.5899,
+        "RMSE": 209.3321,
+        "R2": 0.5163
+      },
+      "congestion": {
+        "MAE": 0.0052,
+        "RMSE": 0.008,
+        "R2": -0.5131
+      },
+      "congestion_classification": {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0
+      }
+    },
+    "45m": {
+      "speed": {
+        "MAE": 0.2805,
+        "RMSE": 0.4745,
+        "R2": 0.9982
+      },
+      "flow": {
+        "MAE": 149.6024,
+        "RMSE": 206.9159,
+        "R2": 0.5605
+      },
+      "congestion": {
+        "MAE": 0.0054,
+        "RMSE": 0.0093,
+        "R2": -0.6515
+      },
+      "congestion_classification": {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0
+      }
+    },
+    "60m": {
+      "speed": {
+        "MAE": 0.2006,
+        "RMSE": 0.3329,
+        "R2": 0.9991
+      },
+      "flow": {
+        "MAE": 152.691,
+        "RMSE": 211.2642,
+        "R2": 0.5816
+      },
+      "congestion": {
+        "MAE": 0.0047,
+        "RMSE": 0.0075,
+        "R2": 0.2008
+      },
+      "congestion_classification": {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0
+      }
+    }
+  }
+}
