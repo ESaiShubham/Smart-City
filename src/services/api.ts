@@ -10,7 +10,7 @@ import {
 } from '../types/traffic';
 import fullHyderabadNetwork from '../data/fullHyderabadNetwork.json';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api/v1' : 'http://localhost:8000/api/v1');
 
 // Full 436-segment Hyderabad road grid dataset
 const FALLBACK_ROADS: RoadStatus[] = fullHyderabadNetwork as RoadStatus[];
